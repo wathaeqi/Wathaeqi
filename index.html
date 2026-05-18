@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="description" content="وثائقي الرقمية — منصة رقمية تساعد ملاك المنازل على حفظ وإدارة جميع وثائق وبيانات منازلهم"/>
+<meta property="og:title" content="وثائقي الرقمية — ملفات منزلك في مكان واحد"/>
+<meta property="og:description" content="صكوك، مخططات، ضمانات، تشطيبات — كل شيء يخص منزلك محفوظ بأمان"/>
+<meta property="og:type" content="website"/>
+<title>وثائقي الرقمية — ملفات منزلك في مكان واحد</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Cairo:wght@400;700;900&display=swap" rel="stylesheet"/>
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  body{background:#0D3B26;direction:rtl;font-family:'IBM Plex Sans Arabic',sans-serif}
+  #root{min-height:100vh}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState } = React;
+
+const G = `
+:root {
+  --g900:#0D3B26; --g800:#145C3A; --g700:#1A7A4E; --g600:#22A065; --g500:#2ECC82;
+  --g100:#E6F7EF; --g50:#F0FAF5;
+  --slate:#F4F6F8; --white:#FFFFFF; --ink:#111827; --sub:#6B7280; --muted:#9CA3AF;
+  --border:rgba(0,0,0,0.07); --red:#EF4444; --amber:#F59E0B;
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.06),0 1px 2px rgba(0,0,0,0.04);
+  --shadow:0 4px 16px rgba(0,0,0,0.07);
+  --r-sm:12px; --r:18px; --r-lg:24px;
+}
+html,body{direction:rtl;overflow-x:hidden}
+.land{background:#fff;min-height:100vh}
+.l-nav{position:fixed;top:0;left:0;right:0;z-index:999;height:60px;background:rgba(255,255,255,.95);backdrop-filter:blur(16px);border-bottom:1px solid rgba(0,0,0,.06);display:flex;align-items:center;justify-content:space-between;padding:0 5%}
+.l-nav-logo{display:flex;align-items:center;gap:9px;text-decoration:none}
+.l-nav-icon{width:34px;height:34px;background:#0D3B26;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.l-nav-name{font-family:'Cairo',sans-serif;font-weight:900;font-size:17px;color:#0D3B26}
+.l-nav-name span{color:#22A065}
+.l-btn-try{padding:9px 20px;background:#0D3B26;color:#fff;border:none;border-radius:20px;font-family:'Cairo',sans-serif;font-weight:700;font-size:13px;cursor:pointer;transition:all .2s}
+.l-btn-try:hover{background:#145C3A;transform:translateY(-1px)}
+.l-hero{min-height:100vh;display:flex;align-items:center;background:linear-gradient(160deg,#0D3B26 0%,#1A7A4E 50%,#22A065 100%);padding:100px 5% 80px;position:relative;overflow:hidden}
+.l-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 30% 50%,rgba(255,255,255,.06) 0%,transparent 60%)}
+.l-hero-left{flex:1;max-width:560px;z-index:1}
+.l-hero-pill{display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:30px;padding:5px 16px;font-size:12px;font-weight:700;color:rgba(255,255,255,.9);margin-bottom:22px}
+.l-pulse{width:7px;height:7px;background:#2ECC82;border-radius:50%;animation:lpulse 2s infinite}
+@keyframes lpulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.6)}}
+.l-hero h1{font-family:'Cairo',sans-serif;font-weight:900;font-size:clamp(2rem,5vw,3.8rem);color:#fff;line-height:1.15;letter-spacing:-.5px;margin-bottom:18px}
+.l-hero h1 em{color:#2ECC82;font-style:normal}
+.l-hero p{color:rgba(255,255,255,.7);font-size:clamp(.95rem,2vw,1.15rem);line-height:1.9;margin-bottom:36px;max-width:480px}
+.l-hero-btns{display:flex;gap:12px;flex-wrap:wrap}
+.l-btn-main{padding:15px 30px;background:#fff;color:#0D3B26;border:none;border-radius:14px;font-family:'Cairo',sans-serif;font-weight:900;font-size:15px;cursor:pointer;transition:all .22s;display:flex;align-items:center;gap:8px}
+.l-btn-main:hover{background:#F0FAF5;transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.2)}
+.l-btn-ghost2{padding:15px 30px;background:rgba(255,255,255,.1);color:#fff;border:1.5px solid rgba(255,255,255,.25);border-radius:14px;font-family:'Cairo',sans-serif;font-weight:700;font-size:15px;cursor:pointer;transition:all .22s}
+.l-btn-ghost2:hover{background:rgba(255,255,255,.18)}
+.l-hero-right{flex-shrink:0;margin-right:5%;z-index:1}
+.mini-phone{width:220px;background:#1a1a1a;border-radius:32px;padding:9px;box-shadow:0 40px 80px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.08)}
+.mini-screen{background:#F4F6F8;border-radius:24px;overflow:hidden;height:420px}
+.ticker{background:#0D3B26;padding:11px 0;overflow:hidden;white-space:nowrap}
+.ticker-inner{display:inline-block;animation:tick 28s linear infinite}
+.ticker-item{display:inline-block;padding:0 36px;font-family:'Cairo',sans-serif;font-weight:700;font-size:13px;color:rgba(255,255,255,.7)}
+.ticker-item span{color:#2ECC82;margin-left:8px}
+@keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.l-section{padding:90px 5%}
+.l-section-dark{background:#0D3B26}
+.l-section-light{background:#F4F6F8}
+.l-section-white{background:#fff}
+.l-tag{font-size:11px;font-weight:700;letter-spacing:2px;color:#22A065;text-transform:uppercase;display:block;margin-bottom:10px}
+.l-title{font-family:'Cairo',sans-serif;font-weight:900;font-size:clamp(1.6rem,3.5vw,2.5rem);color:#111827;line-height:1.25;margin-bottom:14px}
+.l-title-white{color:#fff}
+.l-sub{font-size:16px;color:#6B7280;line-height:1.9;max-width:520px}
+.l-sub-white{color:rgba(255,255,255,.6)}
+.l-center{text-align:center}
+.l-center .l-sub{margin:0 auto}
+.prob-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;margin-top:50px}
+.prob-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:26px;transition:all .25s;position:relative;overflow:hidden}
+.prob-card::before{content:'';position:absolute;top:0;right:0;width:100%;height:3px;background:linear-gradient(90deg,#22A065,transparent);opacity:0;transition:.3s}
+.prob-card:hover{background:rgba(255,255,255,.08);transform:translateY(-4px)}
+.prob-card:hover::before{opacity:1}
+.prob-icon{font-size:30px;margin-bottom:14px;display:block}
+.prob-card h3{font-family:'Cairo',sans-serif;font-weight:700;font-size:15px;color:#fff;margin-bottom:7px}
+.prob-card p{font-size:13px;color:rgba(255,255,255,.5);line-height:1.7}
+.steps-wrap{max-width:680px;margin:50px auto 0;display:flex;flex-direction:column;gap:0;position:relative}
+.steps-wrap::before{content:'';position:absolute;top:30px;bottom:30px;right:27px;width:2px;background:linear-gradient(to bottom,#22A065,transparent)}
+.step{display:flex;align-items:flex-start;gap:22px;padding:24px 0;position:relative;z-index:1}
+.step-num{width:56px;height:56px;border-radius:16px;background:#fff;border:2px solid rgba(34,160,101,.3);display:flex;align-items:center;justify-content:center;font-family:'Cairo',sans-serif;font-weight:900;font-size:18px;color:#22A065;flex-shrink:0;box-shadow:0 4px 14px rgba(34,160,101,.1);transition:all .25s}
+.step:hover .step-num{background:#0D3B26;color:#fff;border-color:#0D3B26;transform:rotate(-5deg)}
+.step-body{flex:1;padding-top:10px}
+.step-body h3{font-family:'Cairo',sans-serif;font-weight:800;font-size:17px;color:#111827;margin-bottom:6px}
+.step-body p{font-size:14px;color:#6B7280;line-height:1.8}
+.feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;margin-top:50px}
+.feat-card{padding:26px;border-radius:18px;background:#F4F6F8;border:1px solid rgba(0,0,0,.06);transition:all .25s;cursor:default}
+.feat-card:hover{background:#0D3B26;transform:translateY(-5px);box-shadow:0 20px 40px rgba(13,59,38,.15)}
+.feat-card:hover .feat-title{color:#fff}
+.feat-card:hover .feat-desc{color:rgba(255,255,255,.6)}
+.feat-card:hover .feat-icon-wrap{background:rgba(46,204,130,.15)}
+.feat-icon-wrap{width:48px;height:48px;border-radius:14px;background:rgba(13,59,38,.07);display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:14px;transition:.25s}
+.feat-title{font-family:'Cairo',sans-serif;font-weight:700;font-size:15px;color:#111827;margin-bottom:7px;transition:.25s}
+.feat-desc{font-size:13px;color:#6B7280;line-height:1.7;transition:.25s}
+.demo-wrap{display:flex;gap:50px;align-items:flex-start;justify-content:center;flex-wrap:wrap;margin-top:60px}
+.demo-sidebar{flex:1;min-width:260px;max-width:400px}
+.demo-phone-wrap{flex-shrink:0;width:320px;background:#1a1a1a;border-radius:42px;padding:12px;box-shadow:0 40px 80px rgba(0,0,0,.35),0 0 0 1px rgba(255,255,255,.08);position:sticky;top:80px}
+.demo-screen-wrap{background:#F4F6F8;border-radius:30px;height:600px;overflow:hidden;position:relative}
+.demo-notch{width:100px;height:26px;background:#1a1a1a;border-radius:0 0 16px 16px;margin:0 auto 7px;display:flex;align-items:center;justify-content:center;gap:5px}
+.demo-nd{width:7px;height:7px;background:#222;border-radius:50%}
+.demo-nb{width:44px;height:4px;background:#222;border-radius:4px}
+.exp-tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#22A065;margin-bottom:10px}
+.exp-title{font-family:'Cairo',sans-serif;font-weight:900;font-size:clamp(1.3rem,3vw,1.8rem);color:#111827;line-height:1.3;margin-bottom:12px}
+.exp-body{font-size:14.5px;color:#6B7280;line-height:1.9;margin-bottom:20px}
+.exp-pts{list-style:none;display:flex;flex-direction:column;gap:9px;margin-bottom:24px}
+.exp-pts li{display:flex;align-items:flex-start;gap:9px;font-size:13.5px;color:#111827}
+.exp-pts li::before{content:attr(data-i);font-size:16px;flex-shrink:0}
+.exp-dots{display:flex;gap:7px;margin-bottom:24px}
+.exp-dot{width:8px;height:8px;border-radius:50%;background:#E5E7EB;cursor:pointer;transition:.25s}
+.exp-dot.on{width:22px;border-radius:4px;background:#0D3B26}
+.exp-dot.done{background:#22A065}
+.exp-nav{display:flex;gap:9px;flex-wrap:wrap}
+.exp-btn-n{padding:12px 24px;background:#0D3B26;color:#fff;border:none;border-radius:12px;font-family:'Cairo',sans-serif;font-weight:800;font-size:14px;cursor:pointer;transition:.22s}
+.exp-btn-n:hover{background:#145C3A;transform:translateY(-2px)}
+.exp-btn-p{padding:12px 18px;background:transparent;color:#6B7280;border:1.5px solid #E5E7EB;border-radius:12px;font-family:'Cairo',sans-serif;font-weight:700;font-size:14px;cursor:pointer;transition:.2s}
+.exp-btn-p:hover{border-color:#0D3B26;color:#0D3B26}
+.reg-section{background:linear-gradient(160deg,#0D3B26,#1A7A4E);padding:90px 5%;text-align:center}
+.reg-section h2{font-family:'Cairo',sans-serif;font-weight:900;font-size:clamp(1.6rem,3.5vw,2.4rem);color:#fff;margin-bottom:12px}
+.reg-section p{color:rgba(255,255,255,.6);font-size:15px;max-width:420px;margin:0 auto 32px;line-height:1.9}
+.reg-form{max-width:420px;margin:0 auto;display:flex;gap:9px}
+.reg-input{flex:1;padding:14px 16px;border-radius:12px;border:1.5px solid rgba(255,255,255,.15);background:rgba(255,255,255,.08);color:#fff;font-family:'IBM Plex Sans Arabic',sans-serif;font-size:14px;outline:none;text-align:right;direction:rtl;transition:border-color .2s}
+.reg-input:focus{border-color:#2ECC82}
+.reg-input::placeholder{color:rgba(255,255,255,.3)}
+.reg-submit{padding:14px 22px;background:#fff;color:#0D3B26;border:none;border-radius:12px;font-family:'Cairo',sans-serif;font-weight:900;font-size:14px;cursor:pointer;transition:.22s;white-space:nowrap;flex-shrink:0}
+.reg-submit:hover{background:#F0FAF5;transform:translateY(-2px)}
+.reg-note{margin-top:12px;font-size:11.5px;color:rgba(255,255,255,.25)}
+.l-footer{background:#0a2a1a;border-top:1px solid rgba(255,255,255,.06);padding:24px 5%;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.l-foot-logo{font-family:'Cairo',sans-serif;font-weight:900;font-size:15px;color:#fff}
+.l-foot-logo span{color:#22A065}
+.l-foot-copy{font-size:12px;color:rgba(255,255,255,.22)}
+.app-bg{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,#0D3B26 0%,#092B1C 60%,#050F09 100%);padding:24px 16px}
+.phone{width:390px;min-height:844px;background:var(--slate);border-radius:44px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 0 0 10px #1a1a1a,0 0 0 12px #2a2a2a,0 40px 80px rgba(0,0,0,0.7);position:relative}
+.notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:120px;height:34px;background:#1a1a1a;border-radius:0 0 20px 20px;z-index:100}
+.sbar{height:50px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 24px 8px;font-size:12px;font-weight:600;flex-shrink:0;position:relative;z-index:10}
+.scroll{flex:1;overflow-y:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.scroll::-webkit-scrollbar{display:none}
+.topnav{display:flex;align-items:center;justify-content:space-between;padding:14px 20px 12px;background:var(--white);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:20;flex-shrink:0}
+.topnav-title{font-size:16px;font-weight:700;color:var(--ink)}
+.back-btn{display:flex;align-items:center;gap:6px;color:var(--g700);font-weight:600;font-size:14px;background:none;border:none;cursor:pointer;font-family:inherit}
+.card{background:var(--white);border-radius:var(--r);box-shadow:var(--shadow-sm);border:1px solid var(--border);overflow:hidden}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-green{background:var(--g100);color:var(--g800)}
+.badge-red{background:#FEE2E2;color:#B91C1C}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px 20px;border-radius:50px;border:none;cursor:pointer;font-family:inherit;font-weight:600;font-size:15px;transition:all 0.18s}
+.btn-primary{background:var(--g800);color:#fff;width:100%}
+.btn-primary:active{background:var(--g900);transform:scale(0.98)}
+.btn-ghost{background:var(--g50);color:var(--g800);border:1.5px solid var(--g100);padding:10px 16px;font-size:13px;border-radius:12px}
+.toggle-wrap{width:44px;height:26px;border-radius:13px;background:var(--g600);cursor:pointer;position:relative;flex-shrink:0;transition:background 0.2s}
+.toggle-wrap.off{background:#D1D5DB}
+.toggle-knob{position:absolute;top:3px;right:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:right 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.2)}
+.toggle-wrap.off .toggle-knob{right:21px}
+.input{width:100%;padding:14px 16px;border:1.5px solid var(--border);border-radius:var(--r-sm);font-family:inherit;font-size:15px;color:var(--ink);background:#fff;outline:none;transition:border-color 0.2s}
+.input:focus{border-color:var(--g600)}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.dot-g{background:#10B981}.dot-r{background:var(--red)}.dot-a{background:var(--amber)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.fu{animation:fadeUp 0.32s ease forwards}
+.d1{animation-delay:.04s;opacity:0}.d2{animation-delay:.08s;opacity:0}.d3{animation-delay:.12s;opacity:0}
+.d4{animation-delay:.16s;opacity:0}.d5{animation-delay:.20s;opacity:0}.d6{animation-delay:.24s;opacity:0}.d7{animation-delay:.28s;opacity:0}
+.reveal{opacity:0;transform:translateY(28px);transition:all .7s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+@media(max-width:800px){
+  .l-hero{flex-direction:column;text-align:center}
+  .l-hero p{margin:0 auto 28px}
+  .l-hero-btns{justify-content:center}
+  .l-hero-right{margin-right:0;margin-top:40px}
+  .demo-wrap{flex-direction:column;align-items:center}
+  .demo-phone-wrap{position:relative;top:0}
+  .demo-sidebar{max-width:100%}
+  .reg-form{flex-direction:column}
+  .steps-wrap::before{display:none}
+}
+`;
+
+const Ic = {
+  chev:<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>,
+  chevD:<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>,
+  bell:<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>,
+  plus:<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
+  dl:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="8 17 12 21 16 17"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.88 18.09A5 5 0 0018 9h-1.26A8 8 0 103 16.29"/></svg>,
+  upload:<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/></svg>,
+  headset:<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 18v-6a9 9 0 0118 0v6"/><path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3zM3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3z"/></svg>,
+  settings:<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>,
+  logout:<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>,
+  eye:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>,
+  note:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>,
+};
+
+const ROOMS = [
+  {id:'r1',icon:'🛏️',name:'غرفة النوم الرئيسية',specs:{paint:'Jotun 1024 Timeless',floor:'Parquet Oak Light',ac:'Daikin 2.5 طن',light:'Spotlight 3000K'},devices:[{icon:'❄️',name:'مكيف دايكن',end:'1 مارس 2027',provider:'CoolAir KSA',active:true},{icon:'💡',name:'نظام الإضاءة الذكية',end:'15 فبراير 2025',provider:'LuminTech',active:false}]},
+  {id:'r2',icon:'🛏️',name:'غرفة النوم 2',specs:{paint:'Jotun 1024 Timeless',floor:'Parquet Oak Light',ac:'Daikin 2 طن',light:'Spotlight 3000K'},devices:[{icon:'❄️',name:'مكيف دايكن',end:'1 مارس 2027',provider:'CoolAir KSA',active:true}]},
+  {id:'r3',icon:'🛏️',name:'غرفة النوم 3',specs:{paint:'Jotun 1024 Timeless',floor:'Parquet Oak Light',ac:'Daikin 2 طن',light:'Spotlight 3000K'},devices:[{icon:'❄️',name:'مكيف دايكن',end:'1 مارس 2027',provider:'CoolAir KSA',active:true}]},
+  {id:'r4',icon:'🛁',name:'دورة المياه الرئيسية',specs:{paint:'Jotun 0001 White',floor:'سيراميك أبيض مطفي',sanitary:'Grohe + RAK',light:'Downlight 4000K'},devices:[{icon:'🚿',name:'سخان المياه Ariston',end:'10 ديسمبر 2025',provider:'Ariston KSA',active:true}]},
+  {id:'r5',icon:'🚽',name:'دورة المياه 2',specs:{paint:'Jotun 0001 White',floor:'سيراميك أبيض مطفي',sanitary:'Grohe + RAK',light:'Downlight 4000K'},devices:[]},
+  {id:'r6',icon:'🍳',name:'المطبخ',specs:{paint:'Jotun 2231 Pearl',floor:'بورسلين رمادي 60×60',counter:'جرانيت أسود',light:'Track Light 4000K'},devices:[{icon:'🔥',name:'كاشف الدخان',end:'1 يناير 2026',provider:'SafeGuard Co',active:true},{icon:'📦',name:'ميكروويف Sharp',end:'3 نوفمبر 2025',provider:'HeatWave Co',active:true}]},
+  {id:'r7',icon:'🛋️',name:'غرفة المعيشة',specs:{paint:'Jotun 2231 Pearl',floor:'بورسلين 120×120 رمادي فاتح',ceiling:'جبس بورد مع إضاءة مخفية',light:'Spotlight + Strip 3000K'},devices:[{icon:'❄️',name:'مكيف مركزي',end:'1 مارس 2027',provider:'CoolAir KSA',active:true},{icon:'📺',name:'شاشة Samsung 65"',end:'5 مايو 2026',provider:'Samsung KSA',active:true}]},
+  {id:'r8',icon:'🚗',name:'الجراج',specs:{floor:'إيبوكسي رمادي',door:'باب أوتوماتيكي',light:'LED صناعي 6000K',ceiling:'مكشوف'},devices:[{icon:'🚪',name:'باب الجراج الكهربائي',end:'10 نوفمبر 2025',provider:'VisionCare Co',active:true}]},
+];
+
+const NOTIFS = [
+  {id:1,icon:'⚠️',title:'ضمان العزل المائي',body:'انتهى الضمان منذ 3 أشهر',time:'منذ 3 أشهر',type:'expired',read:false},
+  {id:2,icon:'🔔',title:'ضمان نظام التكييف',body:'تبقى 45 يوم على انتهاء الضمان',time:'منذ يوم',type:'warning',read:false},
+  {id:3,icon:'🔔',title:'ضمان باب الجراج',body:'تبقى 8 أشهر على انتهاء الضمان',time:'منذ أسبوع',type:'ok',read:true},
+  {id:4,icon:'✅',title:'تم رفع محضر الاستلام',body:'تمت إضافة المستند بنجاح',time:'منذ 3 أيام',type:'ok',read:true},
+  {id:5,icon:'⚠️',title:'ضمان الإضاءة',body:'انتهى الضمان منذ أسبوعين',time:'منذ أسبوعين',type:'expired',read:false},
+];
+
+function SBar({dark}){
+  return(
+    <div className="sbar" style={{color:dark?'#fff':'#111'}}>
+      <span>9:41</span>
+      <div style={{display:'flex',alignItems:'center',gap:5}}>
+        <svg width="15" height="11" viewBox="0 0 15 11" fill={dark?'#fff':'#111'}>
+          <rect x="0" y="3" width="2.5" height="8" rx="1"/><rect x="4" y="2" width="2.5" height="9" rx="1"/>
+          <rect x="8" y="1" width="2.5" height="10" rx="1"/><rect x="12" y="0" width="2.5" height="11" rx="1"/>
+        </svg>
+        <div style={{width:23,height:12,border:`1.5px solid ${dark?'rgba(255,255,255,0.5)':'rgba(0,0,0,0.25)'}`,borderRadius:3,padding:'1.5px 2px',display:'flex'}}>
+          <div style={{width:'70%',background:dark?'#fff':'#111',borderRadius:1.5}}/>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Toggle({on}){return <div className={`toggle-wrap ${on?'':'off'}`}><div className="toggle-knob"/></div>;}
+
+function LoginScreen({nav}){
+  const [phone,setPhone]=useState('');
+  return(
+    <div style={{display:'flex',flexDirection:'column',minHeight:'100%'}}>
+      <SBar dark/>
+      <div style={{position:'relative',height:220,flexShrink:0,overflow:'hidden'}}>
+        <div style={{position:'absolute',inset:0,background:'linear-gradient(160deg,#0D4F32 0%,#1A7A4E 50%,#22A065 100%)'}}/>
+        <svg style={{position:'absolute',inset:0}} width="390" height="220" viewBox="0 0 390 220">
+          <g opacity="0.15">
+            <rect x="70" y="50" width="250" height="170" fill="#fff" rx="6"/>
+            <polygon points="60,50 330,50 195,5" fill="#fff"/>
+            <rect x="100" y="100" width="70" height="120" fill="#0D3B26" rx="4"/>
+            <rect x="210" y="115" width="65" height="70" fill="#0D3B26" rx="3"/>
+          </g>
+        </svg>
+        <div style={{position:'absolute',bottom:20,right:20}}>
+          <div style={{background:'rgba(255,255,255,0.15)',backdropFilter:'blur(10px)',borderRadius:14,padding:'10px 16px',border:'1px solid rgba(255,255,255,0.2)'}}>
+            <div style={{color:'#fff',fontWeight:700,fontSize:16}}>🏡 دليل المنزل الرقمي</div>
+            <div style={{color:'rgba(255,255,255,0.7)',fontSize:11,marginTop:2}}>كل شيء عن وحدتك في مكان واحد</div>
+          </div>
+        </div>
+      </div>
+      <div style={{flex:1,background:'#fff',borderRadius:'28px 28px 0 0',marginTop:-20,padding:'28px 22px',display:'flex',flexDirection:'column'}}>
+        <div className="fu d1" style={{fontSize:20,fontWeight:700,color:'var(--ink)',marginBottom:5}}>تسجيل الدخول</div>
+        <div className="fu d2" style={{fontSize:13,color:'var(--sub)',marginBottom:24}}>أدخل رقم جوالك للمتابعة</div>
+        <div className="fu d3" style={{marginBottom:14}}>
+          <div style={{fontSize:12,fontWeight:600,color:'var(--sub)',marginBottom:7}}>رقم الجوال</div>
+          <div style={{display:'flex',gap:9}}>
+            <div style={{display:'flex',alignItems:'center',gap:6,background:'var(--slate)',border:'1.5px solid var(--border)',borderRadius:12,padding:'13px 12px',flexShrink:0,cursor:'pointer'}}>
+              <span style={{fontSize:16}}>🇸🇦</span><span style={{fontWeight:600,fontSize:13}}>966+</span>{Ic.chevD}
+            </div>
+            <input className="input" type="tel" placeholder="5X XXX XXXX" value={phone} onChange={e=>setPhone(e.target.value)} style={{direction:'ltr',textAlign:'left',flex:1}}/>
+          </div>
+        </div>
+        <div className="fu d4"><button className="btn btn-primary" onClick={()=>nav('otp')}>إرسال رمز التحقق {Ic.chev}</button></div>
+        <div className="fu d5" style={{textAlign:'center',marginTop:'auto',paddingTop:20,fontSize:12,color:'var(--muted)'}}>
+          بالمتابعة توافق على <span style={{color:'var(--g700)',fontWeight:600}}>شروط الخدمة</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function OtpScreen({nav}){
+  const digits=['3','7','2','1','',''];
+  return(
+    <div style={{display:'flex',flexDirection:'column',minHeight:'100%',background:'#fff'}}>
+      <SBar/>
+      <div style={{padding:'10px 18px'}}><button className="back-btn" onClick={()=>nav('login')}>{Ic.chev} رجوع</button></div>
+      <div style={{flex:1,padding:'16px 26px',display:'flex',flexDirection:'column',alignItems:'center'}}>
+        <div className="fu d1" style={{width:64,height:64,background:'var(--g100)',borderRadius:20,display:'flex',alignItems:'center',justifyContent:'center',marginBottom:20}}>
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--g700)" strokeWidth="1.8" strokeLinecap="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+        </div>
+        <div className="fu d2" style={{fontSize:20,fontWeight:700,color:'var(--ink)',marginBottom:7,textAlign:'center'}}>أدخل رمز التحقق</div>
+        <div className="fu d3" style={{fontSize:13,color:'var(--sub)',textAlign:'center',lineHeight:1.6,marginBottom:28}}>
+          تم إرسال رمز من 6 أرقام إلى<br/><span style={{fontWeight:700,color:'var(--ink)',direction:'ltr',display:'inline-block'}}>+966 55 555 5555</span>
+        </div>
+        <div className="fu d4" style={{display:'flex',gap:8,direction:'ltr',marginBottom:28}}>
+          {digits.map((d,i)=>(
+            <div key={i} style={{width:46,height:54,borderRadius:12,border:d?'2px solid var(--g600)':'2px solid var(--border)',background:d?'var(--g50)':'#fafafa',display:'flex',alignItems:'center',justifyContent:'center',fontSize:20,fontWeight:700,color:'var(--g800)'}}>
+              {d||<span style={{color:'#ddd'}}>–</span>}
+            </div>
+          ))}
+        </div>
+        <div className="fu d5" style={{width:'100%',marginBottom:16}}><button className="btn btn-primary" onClick={()=>nav('home')}>تأكيد الرمز</button></div>
+        <div className="fu d6" style={{fontSize:12,color:'var(--sub)'}}>لم تستلم الرمز؟ <span style={{color:'var(--g700)',fontWeight:700,cursor:'pointer'}}>إعادة الإرسال (30)</span></div>
+      </div>
+    </div>
+  );
+}
+
+function HomeScreen({nav}){
+  const unreadCount=NOTIFS.filter(n=>!n.read).length;
+  const mainCards=[
+    {icon:'📖',label:'دليل الوحدة',screen:'unit-guide',bg:'linear-gradient(135deg,#E6F7EF,#C8EDDA)',border:'#B0DFC4'},
+    {icon:'📐',label:'المخططات',screen:'drawings',bg:'linear-gradient(135deg,#FFF7E6,#FDEAB7)',border:'#F5D580'},
+    {icon:'🏛️',label:'الملفات الحكومية',screen:'documents',bg:'linear-gradient(135deg,#EBF4FF,#C8DDF7)',border:'#A0C4F0'},
+  ];
+  const activity=[
+    {icon:'⚠️',title:'ضمان العزل المائي',sub:'انتهى الضمان',dot:'dot-r'},
+    {icon:'🔔',title:'ضمان التكييف',sub:'تبقى 45 يوم',dot:'dot-a'},
+    {icon:'✅',title:'محضر الاستلام',sub:'تم الرفع منذ 3 أيام',dot:null},
+  ];
+  return(
+    <div style={{display:'flex',flexDirection:'column',minHeight:'100%'}}>
+      <div style={{background:'linear-gradient(150deg,#0D3B26 0%,#1A7A4E 100%)',paddingBottom:40}}>
+        <SBar dark/>
+        <div style={{padding:'4px 22px 0',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+          <div>
+            <div style={{color:'rgba(255,255,255,0.65)',fontSize:13}}>صباح الخير 👋</div>
+            <div style={{color:'#fff',fontSize:22,fontWeight:700,marginTop:2}}>خالد</div>
+          </div>
+          <button onClick={()=>nav('notifications')} style={{width:44,height:44,borderRadius:14,background:'rgba(255,255,255,0.15)',border:'none',display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',color:'#fff',position:'relative',fontFamily:'inherit'}}>
+            {Ic.bell}
+            {unreadCount>0&&<div style={{position:'absolute',top:8,right:8,width:8,height:8,background:'#F87171',borderRadius:'50%',border:'1.5px solid #1A7A4E'}}/>}
+          </button>
+        </div>
+      </div>
+      <div className="scroll" style={{marginTop:-24,flex:1}}>
+        <div style={{margin:'0 16px',borderRadius:22,background:'#fff',boxShadow:'0 8px 32px rgba(0,0,0,0.12)',overflow:'hidden'}} className="fu d1">
+          <div style={{position:'relative',height:100}}>
+            <div style={{position:'absolute',inset:0,background:'linear-gradient(135deg,#B8C9B0 0%,#6B9E60 100%)'}}/>
+            <div style={{position:'absolute',top:10,right:12}}><span className="badge badge-green">• نشط</span></div>
+          </div>
+          <div style={{padding:'12px 16px'}}>
+            <div style={{fontSize:15,fontWeight:700,color:'var(--ink)'}}>فلل الياسمين – الوحدة 8</div>
+            <div style={{fontSize:12,color:'var(--sub)',marginTop:3}}>مجمع الياسمين، الرياض</div>
+          </div>
+        </div>
+        <div style={{padding:'16px 16px 8px'}}>
+          <div style={{fontSize:12,fontWeight:600,color:'var(--sub)',marginBottom:10}}>الخدمات</div>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:9}}>
+            {mainCards.map((c,i)=>(
+              <button key={i} onClick={()=>nav(c.screen)} className={`fu d${i+2}`}
+                style={{background:c.bg,border:`1.5px solid ${c.border}`,borderRadius:16,padding:'14px 6px',cursor:'pointer',display:'flex',flexDirection:'column',alignItems:'center',gap:7,fontFamily:'inherit'}}>
+                <span style={{fontSize:24}}>{c.icon}</span>
+                <span style={{fontSize:11,fontWeight:700,color:'var(--ink)',textAlign:'center',lineHeight:1.3}}>{c.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+        <div style={{padding:'6px 16px 20px'}}>
+          <div style={{fontSize:12,fontWeight:600,color:'var(--sub)',marginBottom:10}}>آخر النشاطات</div>
+          <div className="card fu d5">
+            {activity.map((a,i,arr)=>(
+              <div key={i}>
+                <div style={{display:'flex',alignItems:'center',gap:11,padding:'12px 14px'}}>
+                  <div style={{width:36,height:36,borderRadius:11,background:'var(--slate)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:16,flexShrink:0}}>{a.icon}</div>
+                  <div style={{flex:1}}>
+                    <div style={{fontSize:13,fontWeight:600,color:'var(--ink)'}}>{a.title}</div>
+                    <div style={{fontSize:11,color:'var(--sub)',marginTop:2}}>{a.sub}</div>
+                  </div>
+                  {a.dot&&<div className={`dot ${a.dot}`}/>}
+                </div>
+                {i<arr.length-1&&<div style={{height:1,background:'var(--border)',margin:'0 14px'}}/>}
+              </div>
+            ))}
+          </div>
+        </div>
+        <div style={{padding:'0 16px 28px'}}>
+          <div className="card fu d6">
+            {[
+              {icon:Ic.settings,label:'الإعدادات',screen:'settings'},
+              {icon:Ic.headset,label:'خدمة العملاء',screen:'support'},
+              {icon:Ic.logout,label:'تسجيل الخروج',screen:'login',red:true},
+            ].map((r,i,arr)=>(
+              <div key={i}>
+                <button onClick={()=>nav(r.screen)} style={{width:'100%',display:'flex',alignItems:'center',gap:12,padding:'14px 14px',background:'none',border:'none',cursor:'pointer',fontFamily:'inherit'}}>
+                  <div style={{width:34,height:34,borderRadius:10,background:r.red?'#FEF2F2':'var(--slate)',display:'flex',alignItems:'center',justifyContent:'center',color:r.red?'var(--red)':'var(--sub)',flexShrink:0}}>{r.icon}</div>
+                  <div style={{flex:1,fontSize:13,fontWeight:600,color:r.red?'var(--red)':'var(--ink)',textAlign:'right'}}>{r.label}</div>
+                  {!r.red&&<div style={{color:'var(--muted)'}}>{Ic.chev}</div>}
+                </button>
+                {i<arr.length-1&&<div style={{height:1,background:'var(--border)',margin:'0 14px'}}/>}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function NotificationsScreen({nav}){
+  const unread=NOTIFS.filter(n=>!n.read),read=NOTIFS.filter(n=>n.read);
+  const tc=t=>t==='expired'?'#FEE2E2':t==='warning'?'#FEF3C7':'var(--g100)';
+  const td=t=>t==='expired'?'dot-r':t==='warning'?'dot-a':'dot-g';
+  return(
+    <div style={{display:'flex',flexDirection:'column',minHeight:'100%'}}>
+      <div className="topnav"><button className="back-btn" onClick={()=>nav('home')}>{Ic.chev} رجوع</button><div className="topnav-title">الإشعارات</div><div style={{width:36}}/></div>
+      <div className="scroll" style={{background:'var(--slate)',padding:'12px 14px'}}>
+        {unread.length>0&&<>
+          <div style={{fontSize:11,fontWeight:700,color:'var(--sub)',marginBottom:8}}>غير مقروءة ({unread.length})</div>
+          {unread.map((n,i)=>(
+            <div key={n.id} className={`card fu d${i+1}`} style={{marginBottom:9,padding:'13px 14px',display:'flex',gap:11,alignItems:'flex-start',borderRight:`3px solid ${n.type==='expired'?'var(--red)':n.type==='warning'?'var(--amber)':'var(--g600)'}`}}>
+              <div style={{width:40,height:40,borderRadius:12,background:tc(n.type),display:'flex',alignItems:'center',justifyContent:'center',fontSize:18,flexShrink:0}}>{n.icon}</div>
+              <div style={{flex:1}}>
+                <div style={{fontSize:13,fontWeight:700,color:'var(--ink)',marginBottom:2}}>{n.title}</div>
+                <div style={{fontSize:12,color:'var(--sub)',lineHeight:1.5}}>{n.body}</div>
+                <div style={{fontSize:10,color:'var(--muted)',marginTop:4}}>{n.time}</div>
+              </div>
+              <div className={`dot ${td(n.type)}`} style={{marginTop:4}}/>
+            </div>
+          ))}
+        </>}
+        {read.length>0&&<>
+          <div style={{fontSize:11,fontWeight:700,color:'var(--sub)',margin:'12px 0 8px'}}>مقروءة</div>
+          {read.map((n,i)=>(
+            <div key={n.id} className={`card fu d${i+3}`} style={{marginBottom:9,padding:'13px 14px',display:'flex',gap:11,alignItems:'flex-start',opacity:.7}}>
+              <div style={{width:40,height:40,borderRadius:12,background:'var(--slate)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:18,flexShrink:0}}>{n.icon}</div>
+              <div style={{flex:1}}>
+                <div style={{fontSize:13,fontWeight:600,color:'var(--ink)',marginBottom:2}}>{n.title}</div>
+                <div style={{fontSize:12,color:'var(--sub)'}}>{n.body}</div>
+                <div style={{fontSize:10,color:'var(--muted)',marginTop:4}}>{n.time}</div>
+              </div>
+            </div>
+          ))}
+        </>}
+      </div>
+    </div>
+  );
+}
+
+function UnitGuideScreen({nav}){
+  return(
+    <div style={{display:'flex',flexDirection:'column',minHeight:'100%'}}>
+      <div style={{background:'linear-gradient(150deg,#0D3B26,#1A7A4E)',paddingBottom:18}}>
+        <SBar dark/>
+        <div style={{padding:'4px 20px 0'}}>
+          <div style={{color:'rgba(255,255,255,0.6)',fontSize:12}}>الوحدة 8 – فلل الياسمين</div>
+          <div style={{color:'#fff',fontSize:19,fontWeight:700,marginTop:2}}>دليل الوحدة</div>
+        </div>
+      </div>
+      <div className="scroll" style={{background:'#fff',borderRadius:'18px 18px 0 0',marginTop:-12,padding:'16px 14px'}}>
+        <div style={{fontSize:12,color:'var(--sub)',marginBottom:14}}>اختر الغرفة لعرض المواصفات والأجهزة</div>
+        {ROOMS.map((r,i)=>(
+          <button key={r.id} onClick={()=>nav('room:'+r.id)} className={`fu d${Math.min(i+1,7)}`}
+            style={{width:'100%',background:'var(--white)',border:'1px solid var(--border)',borderRadius:14,padding:'13px 14px',display:'flex',alignItems:'center',gap:11,cursor:'pointer',fontFamily:'inherit',marginBottom:9,boxShadow:'var(--shadow-sm)'}}>
+            <div style={{width:42,height:42,borderRadius:13,background:'var(--g50)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:20,flexShrink:0}}>{r.icon}</div>
+            <div style={{flex:1,textAlign:'right'}}>
+              <div style={{fontSize:14,fontWeight:700,color:'var(--ink)'}}>{r.name}</div>
+              <div style={{fontSize:11,color:'var(--sub)',marginTop:2}}>{r.devices.length} جهاز</div>
+            </div>
+            {Ic.chev}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function RoomScreen({nav,roomId}){
+  const room=ROOMS.find(r=>r.id===roomId);
+  const [tab,setTab]=useState('specs');
+  if(!room) return null;
+  const specLabels={paint:'🎨 كود الدهان',floor:'🪵 الأرضية',ac:'❄️ التكييف',light:'💡 الإضاءة',sanitary:'🚿 الصحيات',counter:'🍽️ الكونتر',ceiling:'🏛️ الأسقف',door:'🚪 الباب'};
+  return(
+    <div style={{display:'flex',flexDirection:'column',minHeight:'100%'}}>
+      <div className="topnav"><button className="back-btn" onClick={()=>nav('unit-guide')}>{Ic.chev} رجوع</button><div className="topnav-title">{room.name}</div><div style={{width:36}}/></div>
+      <div style={{display:'flex',background:'#fff',borderBottom:'1px solid var(--border)',padding:'0 18px',flexShrink:0}}>
+        {[['specs','المواصفات'],['devices','الأجهزة والضمانات']].map(([id,label])=>(
+          <button key={id} onClick={()=>setTab(id)} style={{padding:'11px 12px',border:'none',background:'none',fontFamily:'inherit',fontSize:13,fontWeight:600,cursor:'pointer',color:tab===id?'var(--g700)':'var(--muted)',borderBottom:tab===id?'2.5px solid var(--g700)':'2.5px solid transparent',marginBottom:-1,transition:'color 0.2s'}}>{label}</button>
+        ))}
+      </div>
+      <div className="scroll" style={{background:'var(--slate)',padding:'14px'}}>
+        {tab==='specs'&&(
+          <div className="card fu d1" style={{padding:'4px 0'}}>
+            {Object.entries(room.specs).map(([k,v],i,arr)=>(
+              <div key={k}>
+                <div style={{padding:'13px 16px',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+                  <div style={{fontSize:12,color:'var(--sub)'}}>{specLabels[k]||k}</div>
+                  <div style={{fontSize:13,fontWeight:700,color:'var(--ink)'}}>{v}</div>
+                </div>
+                {i<arr.length-1&&<div style={{height:1,background:'var(--border)',margin:'0 16px'}}/>}
+              </div>
+            ))}
+          </div>
+        )}
+        {tab==='devices'&&(
+          <div>
+            {room.devices.length===0
+              ?<div style={{textAlign:'center',padding:'36px 18px',color:'var(--muted)',fontSize:14}}>لا توجد أجهزة مسجلة في هذه الغرفة</div>
+              :room.devices.map((d,i)=>(
+                <div key={i} className={`card fu d${i+1}`} style={{marginBottom:11,padding:'14px'}}>
+                  <div style={{display:'flex',alignItems:'center',gap:11,marginBottom:11}}>
+                    <div style={{width:42,height:42,borderRadius:13,background:d.active?'var(--g100)':'#FEE2E2',display:'flex',alignItems:'center',justifyContent:'center',fontSize:20,flexShrink:0}}>{d.icon}</div>
+                    <div style={{flex:1}}>
+                      <div style={{fontSize:13,fontWeight:700,color:'var(--ink)'}}>{d.name}</div>
+                      <span className={d.active?'badge badge-green':'badge badge-red'}>
+                        <span className={`dot ${d.active?'dot-g':'dot-r'}`}/> {d.active?'نشط':'منتهي'}
+                      </span>
+                    </div>
+                  </div>
+                  <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:7,marginBottom:11}}>
+                    <div style={{background:'var(--slate)',borderRadius:9,padding:'8px 10px'}}>
+                      <div style={{fontSize:10,color:'var(--sub)',marginBottom:2}}>⏰ انتهاء الضمان</div>
+                      <div style={{fontSize:11,fontWeight:700,color:'var(--ink)'}}>{d.end}</div>
+                    </div>
+                    <div style={{background:'var(--slate)',borderRadius:9,padding:'8px 10px'}}>
+                      <div style={{fontSize:10,color:'var(--sub)',marginBottom:2}}>🏢 المزود</div>
+                      <div style={{fontSize:11,fontWeight:700,color:'var(--ink)'}}>{d.provider}</div>
+                    </div>
+                  </div>
+                  <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+                    <div style={{fontSize:11,color:'var(--sub)',fontWeight:600}}>تنبيه قبل انتهاء الضمان</div>
+                    <Toggle on={d.active}/>
+                  </div>
+                </div>
+              ))
+            }
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function DrawingsScreen({nav}){
+  const drws=[
+    {icon:'🏛️',title:'المخطط المعماري',date:'12 أبريل 2025',size:'2.4MB',color:'#EFF6FF'},
+    {icon:'⚙️',title:'المخطط الميكانيكي',date:'12 مايو 2025',size:'1.8MB',color:'#F0FDF4'},
+    {icon:'⚡',title:'المخطط الكهربائي',date:'30 أبريل 2025',size:'3.1MB',color:'#FFFBEB'},
+    {icon:'🚿',title:'مخطط السباكة',date:'15 مارس 2025',size:'1.2MB',color:'#EFF6FF'},
+    {icon:'🔥',title:'مخطط الحريق والإطفاء',date:'20 مارس 2025',size:'0.9MB',color:'#FFF1F2'},
+  ];
+  return(
+    <div style={{display:'flex',flexDirection:'column',minHeight:'100%'}}>
+      <div style={{background:'linear-gradient(150deg,#0D3B26,#1A7A4E)',paddingBottom:18}}>
+        <SBar dark/>
+        <div style={{padding:'4px 20px 0'}}>
+          <button className="back-btn" style={{color:'rgba(255,255,255,0.7)',marginBottom:5}} onClick={()=>nav('home')}>{Ic.chev} الرئيسية</button>
+          <div style={{color:'#fff',fontSize:19,fontWeight:700}}>المخططات</div>
+        </div>
+      </div>
+      <div className="scroll" style={{background:'#fff',borderRadius:'18px 18px 0 0',marginTop:-12,padding:'16px 14px'}}>
+        {drws.map((d,i)=>(
+          <div key={i} className={`card fu d${Math.min(i+1,6)}`} style={{marginBottom:11,padding:'14px',display:'flex',alignItems:'center',gap:13}}>
+            <div style={{width:48,height:48,borderRadius:14,background:d.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:22,flexShrink:0}}>{d.icon}</div>
+            <div style={{flex:1}}>
+              <div style={{fontSize:13,fontWeight:700,color:'var(--ink)'}}>{d.title}</div>
+              <div style={{fontSize:11,color:'var(--sub)',marginTop:3}}>📅 {d.date} · 📦 {d.size}</div>
+            </div>
+            <button style={{width:36,height:36,borderRadius:11,background:'var(--g50)',border:'1.5px solid var(--g100)',display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',color:'var(--g700)',flexShrink:0}}>{Ic.dl}</button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function DocumentsScreen({nav}){
+  const docs=[
+    {icon:'📋',title:'صك الملكية',sub:'مستند رسمي – وزارة العدل'},
+    {icon:'🏗️',title:'رخصة البناء',sub:'بلدية الرياض'},
+    {icon:'✅',title:'محضر الاستلام',sub:'تاريخ 15/3/2024'},
+    {icon:'🏆',title:'شهادة إتمام البناء',sub:'المقاول الرئيسي'},
+  ];
+  return(
+    <div style={{display:'flex',flexDirection:'column',minHeight:'100%'}}>
+      <div style={{background:'linear-gradient(150deg,#0D3B26,#1A7A4E)',paddingBottom:18}}>
+        <SBar dark/>
+        <div style={{padding:'4px 20px 0'}}>
+          <button className="back-btn" style={{color:'rgba(255,255,255,0.7)',marginBottom:5}} onClick={()=>nav('home')}>{Ic.chev} الرئيسية</button>
+          <div style={{color:'#fff',fontSize:19,fontWeight:700}}>الملفات الحكومية</div>
+        </div>
+      </div>
+      <div className="scroll" style={{background:'#fff',borderRadius:'18px 18px 0 0',marginTop:-12,padding:'16px 14px'}}>
+        {docs.map((d,i)=>(
+          <div key={i} className={`card fu d${i+1}`} style={{marginBottom:11,padding:'14px'}}>
+            <div style={{display:'flex',alignItems:'center',gap:11,marginBottom:12}}>
+              <div style={{width:44,height:44,borderRadius:13,background:'#EFF6FF',display:'flex',alignItems:'center',justifyContent:'center',fontSize:20,flexShrink:0}}>{d.icon}</div>
+              <div>
+                <div style={{fontSize:13,fontWeight:700,color:'var(--ink)'}}>{d.title}</div>
+                <div style={{fontSize:11,color:'var(--sub)',marginTop:2}}>{d.sub}</div>
+              </div>
+            </div>
+            <div style={{display:'flex',gap:7}}>
+              <button className="btn btn-ghost" style={{flex:1,gap:4,fontSize:11}}>{Ic.eye} عرض</button>
+              <button className="btn btn-ghost" style={{flex:1,gap:4,fontSize:11}}>{Ic.upload} رفع</button>
+              <button className="btn btn-ghost" style={{flex:1,gap:4,fontSize:11}}>{Ic.note} ملاحظة</button>
+            </div>
+          </div>
+        ))}
+        <button className="btn btn-primary fu d5" style={{marginTop:6}}>{Ic.plus} رفع مستند جديد</button>
+      </div>
+    </div>
+  );
+}
+
+function SettingsScreen({nav}){
+  const rows=[
+    {icon:'👤',label:'معلومات الحساب',sub:'خالد · 0555555555'},
+    {icon:'🔔',label:'إعدادات الإشعارات',sub:'تنبيهات الضمان مفعّلة'},
+    {icon:'🔒',label:'الأمان والخصوصية',sub:'تغيير كلمة المرور'},
+    {icon:'🌐',label:'اللغة',sub:'العربية'},
+    {icon:'❓',label:'عن التطبيق',sub:'الإصدار 1.0.0'},
+  ];
+  return(
+    <div style={{display:'flex',flexDirection:'column',minHeight:'100%'}}>
+      <div className="topnav"><button className="back-btn" onClick={()=>nav('home')}>{Ic.chev} رجوع</button><div className="topnav-title">الإعدادات</div><div style={{width:36}}/></div>
+      <div className="scroll" style={{background:'var(--slate)',padding:'14px'}}>
+        <div className="card fu d1">
+          {rows.map((r,i,arr)=>(
+            <div key={i}>
+              <button style={{width:'100%',display:'flex',alignItems:'center',gap:12,padding:'14px 14px',background:'none',border:'none',cursor:'pointer',fontFamily:'inherit'}}>
+                <div style={{width:36,height:36,borderRadius:11,background:'var(--slate)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:18,flexShrink:0}}>{r.icon}</div>
+                <div style={{flex:1,textAlign:'right'}}>
+                  <div style={{fontSize:13,fontWeight:600,color:'var(--ink)'}}>{r.label}</div>
+                  <div style={{fontSize:11,color:'var(--sub)',marginTop:1}}>{r.sub}</div>
+                </div>
+                {Ic.chev}
+              </button>
+              {i<arr.length-1&&<div style={{height:1,background:'var(--border)',margin:'0 14px'}}/>}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SupportScreen({nav}){
+  return(
+    <div style={{display:'flex',flexDirection:'column',minHeight:'100%'}}>
+      <div className="topnav"><button className="back-btn" onClick={()=>nav('home')}>{Ic.chev} رجوع</button><div className="topnav-title">خدمة العملاء</div><div style={{width:36}}/></div>
+      <div className="scroll" style={{background:'var(--slate)',padding:'14px'}}>
+        <div className="card fu d1" style={{padding:'22px',textAlign:'center',marginBottom:14}}>
+          <div style={{width:60,height:60,background:'var(--g100)',borderRadius:18,display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 14px',color:'var(--g700)'}}>{Ic.headset}</div>
+          <div style={{fontSize:17,fontWeight:700,color:'var(--ink)',marginBottom:5}}>هل تحتاج مساعدة؟</div>
+          <div style={{fontSize:12,color:'var(--sub)',lineHeight:1.7}}>فريق الدعم متاح من 8 صباحاً حتى 10 مساءً</div>
+        </div>
+        <div className="card fu d2">
+          {[
+            {icon:'💬',label:'المحادثة الفورية',sub:'متاح الآن'},
+            {icon:'📞',label:'اتصل بنا',sub:'920000000'},
+            {icon:'📧',label:'راسلنا',sub:'support@dhmanual.sa'},
+            {icon:'❓',label:'الأسئلة الشائعة',sub:'الأسئلة الأكثر شيوعاً'},
+          ].map((r,i,arr)=>(
+            <div key={i}>
+              <button style={{width:'100%',display:'flex',alignItems:'center',gap:12,padding:'14px 14px',background:'none',border:'none',cursor:'pointer',fontFamily:'inherit'}}>
+                <div style={{width:36,height:36,borderRadius:11,background:'var(--g50)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:18,flexShrink:0}}>{r.icon}</div>
+                <div style={{flex:1,textAlign:'right'}}>
+                  <div style={{fontSize:13,fontWeight:600,color:'var(--ink)'}}>{r.label}</div>
+                  <div style={{fontSize:11,color:'var(--sub)',marginTop:1}}>{r.sub}</div>
+                </div>
+                {Ic.chev}
+              </button>
+              {i<arr.length-1&&<div style={{height:1,background:'var(--border)',margin:'0 14px'}}/>}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AppView({onBack}){
+  const [screen,setScreen]=useState('login');
+  function nav(s){setScreen(s);}
+  const isRoom=screen.startsWith('room:');
+  const roomId=isRoom?screen.split(':')[1]:null;
+  const render=()=>{
+    if(isRoom) return <RoomScreen nav={nav} roomId={roomId}/>;
+    switch(screen){
+      case 'login': return <LoginScreen nav={nav}/>;
+      case 'otp': return <OtpScreen nav={nav}/>;
+      case 'home': return <HomeScreen nav={nav}/>;
+      case 'notifications': return <NotificationsScreen nav={nav}/>;
+      case 'unit-guide': return <UnitGuideScreen nav={nav}/>;
+      case 'drawings': return <DrawingsScreen nav={nav}/>;
+      case 'documents': return <DocumentsScreen nav={nav}/>;
+      case 'settings': return <SettingsScreen nav={nav}/>;
+      case 'support': return <SupportScreen nav={nav}/>;
+      default: return <HomeScreen nav={nav}/>;
+    }
+  };
+  return(
+    <div className="app-bg" style={{minHeight:'100vh',position:'relative'}}>
+      <div style={{position:'absolute',top:20,right:20,zIndex:99}}>
+        <button onClick={onBack} style={{padding:'8px 18px',background:'rgba(255,255,255,.1)',color:'#fff',border:'1px solid rgba(255,255,255,.2)',borderRadius:20,fontFamily:'inherit',fontWeight:700,fontSize:13,cursor:'pointer'}}>← العودة للموقع</button>
+      </div>
+      <div className="phone"><div className="notch"/>{render()}</div>
+    </div>
+  );
+}
+
+function MiniAppPreview(){
+  return(
+    <div className="mini-phone">
+      <div className="mini-screen">
+        <div style={{background:'linear-gradient(150deg,#0D3B26,#1A7A4E)',padding:'10px 12px 22px'}}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10}}>
+            <div>
+              <div style={{color:'rgba(255,255,255,.5)',fontSize:9}}>صباح الخير 👋</div>
+              <div style={{color:'#fff',fontSize:13,fontWeight:700}}>خالد</div>
+            </div>
+            <div style={{width:28,height:28,borderRadius:8,background:'rgba(255,255,255,.15)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:12}}>🔔</div>
+          </div>
+        </div>
+        <div style={{marginTop:-12,background:'#F4F6F8',borderRadius:'14px 14px 0 0',padding:'10px'}}>
+          <div style={{background:'#fff',borderRadius:12,overflow:'hidden',marginBottom:8,boxShadow:'0 2px 8px rgba(0,0,0,.08)'}}>
+            <div style={{height:52,background:'linear-gradient(135deg,#B8C9B0,#6B9E60)'}}/>
+            <div style={{padding:'7px 10px'}}>
+              <div style={{fontSize:10,fontWeight:700,color:'#111'}}>فلل الياسمين – الوحدة 8</div>
+              <div style={{fontSize:9,color:'#6B7280'}}>مجمع الياسمين، الرياض</div>
+            </div>
+          </div>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:6,marginBottom:8}}>
+            {[{icon:'📖',label:'دليل الوحدة',bg:'#E6F7EF'},{icon:'📐',label:'المخططات',bg:'#FFF7E6'},{icon:'🏛️',label:'الملفات',bg:'#EBF4FF'}].map((c,i)=>(
+              <div key={i} style={{background:c.bg,borderRadius:10,padding:'8px 4px',textAlign:'center'}}>
+                <div style={{fontSize:16}}>{c.icon}</div>
+                <div style={{fontSize:8,fontWeight:700,color:'#111',marginTop:3,lineHeight:1.2}}>{c.label}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{background:'#fff',borderRadius:10,padding:'8px 10px',boxShadow:'0 1px 4px rgba(0,0,0,.06)'}}>
+            {[{icon:'⚠️',t:'ضمان العزل المائي',s:'انتهى الضمان',c:'#EF4444'},{icon:'🔔',t:'ضمان التكييف',s:'تبقى 45 يوم',c:'#F59E0B'},{icon:'✅',t:'محضر الاستلام',s:'تم الرفع',c:null}].map((a,i,arr)=>(
+              <div key={i}>
+                <div style={{display:'flex',alignItems:'center',gap:6,padding:'5px 0'}}>
+                  <span style={{fontSize:12}}>{a.icon}</span>
+                  <div style={{flex:1}}>
+                    <div style={{fontSize:9,fontWeight:600,color:'#111'}}>{a.t}</div>
+                    <div style={{fontSize:8,color:'#6B7280'}}>{a.s}</div>
+                  </div>
+                  {a.c&&<div style={{width:5,height:5,borderRadius:'50%',background:a.c}}/>}
+                </div>
+                {i<arr.length-1&&<div style={{height:1,background:'rgba(0,0,0,.06)'}}/>}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const DEMO_STEPS=[
+  {tag:'الشاشة الرئيسية',title:'كل عقاراتك\nفي مكان واحد',body:'اختر العقار من الأعلى وتتغير كل البيانات أسفله — كل شيء منظّم.',pts:[{i:'🏡',t:'تبديل بين عقاراتك بضغطة'},{i:'🔔',t:'تنبيه ضمان التكييف ينتهي قريباً'},{i:'📊',t:'نسبة اكتمال ملف العقار'}],screen:'home'},
+  {tag:'دليل الوحدة',title:'كل غرفة\nعالم مستقل',body:'ادخل لأي غرفة وشوف تشطيباتها الكاملة وضماناتها.',pts:[{i:'🎨',t:'كود الدهان الدقيق مع اسم الشركة'},{i:'🪵',t:'نوع الأرضية والرقم المرجعي'},{i:'❄️',t:'ضمان التكييف مع تاريخ الانتهاء'}],screen:'unit-guide'},
+  {tag:'المخططات',title:'مخططاتك\nفي جيبك',body:'المخطط المعماري، الكهربائي، الميكانيكي — كلها محفوظة.',pts:[{i:'📐',t:'5 أنواع مخططات في مكان واحد'},{i:'⬇️',t:'تحميل أي مخطط بضغطة واحدة'},{i:'📏',t:'المساحة والمهندس والتاريخ موثّقة'}],screen:'drawings'},
+  {tag:'الملفات الحكومية',title:'صكوكك\nفي مأمن تام',body:'الصك، رخصة البناء، محضر الاستلام — كلها بتشفير كامل.',pts:[{i:'📋',t:'الصك الرسمي من وزارة العدل'},{i:'🏗️',t:'رخصة البناء وشهادة الإتمام'},{i:'🔒',t:'تشفير كامل — لا أحد يصل غيرك'}],screen:'documents'},
+];
+
+function DemoSection({onTryApp}){
+  const [step,setStep]=useState(0);
+  const [appScreen,setAppScreen]=useState('home');
+  const s=DEMO_STEPS[step];
+  function goTo(n){setStep(n);setAppScreen(DEMO_STEPS[n].screen);}
+  const renderDemo=()=>{
+    switch(appScreen){
+      case 'home': return <HomeScreen nav={s=>{setAppScreen(s);}}/>;
+      case 'unit-guide': return <UnitGuideScreen nav={s=>setAppScreen(s)}/>;
+      case 'drawings': return <DrawingsScreen nav={s=>setAppScreen(s)}/>;
+      case 'documents': return <DocumentsScreen nav={s=>setAppScreen(s)}/>;
+      default: return <HomeScreen nav={s=>setAppScreen(s)}/>;
+    }
+  };
+  return(
+    <section className="l-section l-section-light">
+      <div style={{maxWidth:1100,margin:'0 auto'}}>
+        <div className="l-center reveal">
+          <span className="l-tag">✦ تجربة مباشرة</span>
+          <h2 className="l-title">شوف التطبيق — قبل ما تسجّل</h2>
+          <p className="l-sub">واجهة حقيقية لمنزل افتراضي. تصفّح الغرف، المخططات، والوثائق بنفسك.</p>
+        </div>
+        <div className="demo-wrap">
+          <div className="demo-phone-wrap">
+            <div className="demo-notch"><div className="demo-nd"/><div className="demo-nb"/><div className="demo-nd"/></div>
+            <div className="demo-screen-wrap">{renderDemo()}</div>
+          </div>
+          <div className="demo-sidebar">
+            <div className="exp-dots">
+              {DEMO_STEPS.map((_,i)=>(<div key={i} className={`exp-dot ${i===step?'on':i<step?'done':''}`} onClick={()=>goTo(i)}/>))}
+            </div>
+            <span className="exp-tag">✦ {s.tag}</span>
+            <h3 className="exp-title" style={{whiteSpace:'pre-wrap'}}>{s.title}</h3>
+            <p className="exp-body">{s.body}</p>
+            <ul className="exp-pts">
+              {s.pts.map((p,i)=>(<li key={i} data-i={p.i}>{p.t}</li>))}
+            </ul>
+            <div className="exp-nav">
+              {step>0&&<button className="exp-btn-p" onClick={()=>goTo(step-1)}>السابق</button>}
+              {step<DEMO_STEPS.length-1
+                ?<button className="exp-btn-n" onClick={()=>goTo(step+1)}>التالي ←</button>
+                :<button className="exp-btn-n" onClick={onTryApp}>جرّب التطبيق كاملاً 🚀</button>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function LandingPage({onTryApp}){
+  const [regPhone,setRegPhone]=useState('');
+  const [regDone,setRegDone]=useState(false);
+  function register(){if(!regPhone||regPhone.length<9)return;setRegDone(true);}
+  return(
+    <div className="land">
+      <nav className="l-nav">
+        <a href="#" className="l-nav-logo">
+          <div className="l-nav-icon">🏠</div>
+          <span className="l-nav-name">وثائقي <span>الرقمية</span></span>
+        </a>
+        <button className="l-btn-try" onClick={onTryApp}>جرّب التطبيق ←</button>
+      </nav>
+      <section className="l-hero">
+        <div className="l-hero-left">
+          <div className="l-hero-pill"><div className="l-pulse"/> منصة رقمية لملاك المنازل في السعودية</div>
+          <h1>ملفات منزلك كلها<br/>في <em>مكان واحد</em></h1>
+          <p>صكوك، مخططات، ضمانات، تشطيبات — كل شيء يخص منزلك محفوظ بأمان وجاهز في أي وقت تحتاجه</p>
+          <div className="l-hero-btns">
+            <button className="l-btn-main" onClick={onTryApp}>🚀 جرّب التطبيق الآن</button>
+            <button className="l-btn-ghost2" onClick={()=>document.getElementById('register').scrollIntoView({behavior:'smooth'})}>سجّل اهتمامك</button>
+          </div>
+          <div style={{marginTop:32,display:'flex',alignItems:'center',gap:14}}>
+            <div style={{display:'flex'}}>
+              {['خ','م','أ','س'].map((l,i)=>(
+                <div key={i} style={{width:30,height:30,borderRadius:'50%',background:`hsl(${i*40+120},50%,35%)`,border:'2px solid rgba(255,255,255,.3)',marginLeft:-8,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'Cairo,sans-serif',fontWeight:900,fontSize:12,color:'#fff'}}>{l}</div>
+              ))}
+            </div>
+            <span style={{color:'rgba(255,255,255,.7)',fontSize:13}}>+140 مالك سجّل اهتمامه</span>
+          </div>
+        </div>
+        <div className="l-hero-right"><MiniAppPreview/></div>
+      </section>
+      <div className="ticker">
+        <div className="ticker-inner">
+          {['صكوك العقار','المخططات الهندسية','ضمانات الأجهزة','مواصفات التشطيبات','نقل الملكية الرقمي','وثائق حكومية','كل غرفة بمعلوماتها','إشعارات الضمانات',
+            'صكوك العقار','المخططات الهندسية','ضمانات الأجهزة','مواصفات التشطيبات','نقل الملكية الرقمي','وثائق حكومية','كل غرفة بمعلوماتها','إشعارات الضمانات'].map((t,i)=>(
+            <span key={i} className="ticker-item"><span>✦</span>{t}</span>
+          ))}
+        </div>
+      </div>
+      <section className="l-section l-section-dark">
+        <div style={{maxWidth:1100,margin:'0 auto'}}>
+          <span className="l-tag">المشكلة</span>
+          <h2 className="l-title l-title-white">هل تعرف أين صك منزلك الآن؟</h2>
+          <p className="l-sub l-sub-white">معظم ملاك المنازل يواجهون هذه المشاكل يومياً — ونحن نحلّها</p>
+          <div className="prob-grid">
+            {[
+              {icon:'📁',t:'ملفات مشتتة',d:'بين الواتساب والصور والأدراج — تضيع الوثيقة اللي تحتاجها وقت الأزمة'},
+              {icon:'🔍',t:'مخططات تختفي',d:'كل مرة تحتاج مخطط الكهرباء تبدأ رحلة بحث مضنية'},
+              {icon:'⏰',t:'ضمانات تنتهي بصمت',d:'تكتشف انتهاء الضمان بعد العطل — تخسر مئات الريالات'},
+              {icon:'🏚️',t:'بيع بدون توثيق',d:'لا تعرف مواصفات التشطيبات عند البيع — تخسر في السعر'},
+              {icon:'🎨',t:'أكواد الدهان مجهولة',d:'تريد تجديد دهان؟ لا أحد يعرف الكود أو اللون الأصلي'},
+              {icon:'👷',t:'بيانات الموردين ضائعة',d:'رقم السباك الذي ركّب نظام المياه؟ — لا أحد يتذكر'},
+            ].map((c,i)=>(
+              <div key={i} className="prob-card reveal">
+                <span className="prob-icon">{c.icon}</span>
+                <h3>{c.t}</h3><p>{c.d}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+      <section className="l-section l-section-white">
+        <div style={{maxWidth:1100,margin:'0 auto'}}>
+          <div className="l-center reveal">
+            <span className="l-tag">كيف يعمل</span>
+            <h2 className="l-title">بسيط في 4 خطوات</h2>
+            <p className="l-sub">لا تعقيد ولا خبرة تقنية — مثل تصوير صفحة</p>
+          </div>
+          <div className="steps-wrap">
+            {[
+              {n:'١',t:'أضف منزلك',d:'اسم العقار ونوعه في أقل من دقيقة. يمكنك إضافة أكثر من عقار.'},
+              {n:'٢',t:'حدد الغرف',d:'اختر من قائمة جاهزة أو أضف يدوياً — غرف النوم، الحمامات، المطبخ...'},
+              {n:'٣',t:'ارفع ملفاتك',d:'صوّر أي وثيقة بالجوال — النظام يصنّفها تلقائياً في المكان الصحيح.'},
+              {n:'٤',t:'استمتع بالتنظيم',d:'ابحث بكلمة واحدة، شارك مع عائلتك، واستلم تنبيهات الضمانات.'},
+            ].map((s,i)=>(
+              <div key={i} className="step reveal">
+                <div className="step-num">{s.n}</div>
+                <div className="step-body"><h3>{s.t}</h3><p>{s.d}</p></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+      <section className="l-section l-section-light">
+        <div style={{maxWidth:1100,margin:'0 auto'}}>
+          <div className="l-center reveal">
+            <span className="l-tag">المميزات</span>
+            <h2 className="l-title">كل ما يحتاجه منزلك</h2>
+            <p className="l-sub">منصة متكاملة صُممت للسوق السعودي</p>
+          </div>
+          <div className="feat-grid">
+            {[
+              {icon:'📋',t:'الوثائق الحكومية',d:'الصك، رخصة البناء، شهادة الإتمام — كلها في مكان واحد آمن'},
+              {icon:'📐',t:'المخططات الهندسية',d:'معماري، كهربائي، ميكانيكي — قابلة للتحميل فوراً'},
+              {icon:'🛋️',t:'تشطيبات كل غرفة',d:'كود الدهان، نوع البلاط، الأدوات الصحية لكل غرفة'},
+              {icon:'🔔',t:'تنبيهات الضمانات',d:'تذكير قبل انتهاء أي ضمان بوقت كافٍ لاتخاذ الإجراء'},
+              {icon:'👨‍👩‍👧',t:'مشاركة عائلية',d:'ادعُ أفراد عائلتك بصلاحيات تحددها أنت'},
+              {icon:'🔑',t:'نقل الملكية الرقمي',d:'عند بيع منزلك انقل كل الملفات للمالك الجديد بضغطة'},
+              {icon:'🔍',t:'بحث ذكي',d:'ابحث في كل ملفاتك بكلمة واحدة — يجد المطلوب في ثوانٍ'},
+              {icon:'🔒',t:'أمان تام',d:'تشفير عسكري + نسخ احتياطية يومية تلقائية'},
+            ].map((f,i)=>(
+              <div key={i} className="feat-card reveal">
+                <div className="feat-icon-wrap">{f.icon}</div>
+                <div className="feat-title">{f.t}</div>
+                <div className="feat-desc">{f.d}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+      <DemoSection onTryApp={onTryApp}/>
+      <section className="reg-section" id="register">
+        <h2>كن من أوائل من يجربه</h2>
+        <p>سجّل رقمك الآن واحصل على وصول مبكر مجاني لأول 3 أشهر عند الإطلاق</p>
+        {!regDone?(
+          <>
+            <div className="reg-form">
+              <input type="tel" className="reg-input" placeholder="05XXXXXXXX" maxLength={10} value={regPhone} onChange={e=>setRegPhone(e.target.value.replace(/\D/g,''))} onKeyDown={e=>e.key==='Enter'&&register()}/>
+              <button className="reg-submit" onClick={register}>سجّل الآن</button>
+            </div>
+            <p className="reg-note">🔒 لن نشارك معلوماتك مع أي جهة</p>
+          </>
+        ):(
+          <div style={{color:'#2ECC82',fontWeight:800,fontSize:18,fontFamily:'Cairo,sans-serif'}}>🎉 تم تسجيلك! سنبلّغك فور الإطلاق</div>
+        )}
+        <div style={{marginTop:40}}>
+          <button className="l-btn-main" style={{margin:'0 auto',display:'flex'}} onClick={onTryApp}>🚀 جرّب التطبيق الآن</button>
+        </div>
+      </section>
+      <footer className="l-footer">
+        <div className="l-foot-logo">🏠 وثائقي <span>الرقمية</span></div>
+        <div style={{display:'flex',gap:20}}>
+          {['الخصوصية','الشروط','تواصل معنا'].map(l=>(<a key={l} href="#" style={{color:'rgba(255,255,255,.35)',textDecoration:'none',fontSize:13}}>{l}</a>))}
+        </div>
+        <div className="l-foot-copy">© 2026 وثائقي الرقمية · جميع الحقوق محفوظة</div>
+      </footer>
+    </div>
+  );
+}
+
+function Root(){
+  const [view,setView]=useState('landing');
+  React.useEffect(()=>{
+    const obs=new IntersectionObserver(entries=>{
+      entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);}});
+    },{threshold:0.1,rootMargin:'0px 0px -40px 0px'});
+    const timer=setTimeout(()=>{document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));},200);
+    return()=>{clearTimeout(timer);obs.disconnect();};
+  },[view]);
+  return(
+    <>
+      <style>{G}</style>
+      {view==='landing'?<LandingPage onTryApp={()=>setView('app')}/>:<AppView onBack={()=>setView('landing')}/>}
+    </>
+  );
+}
+
+const root=ReactDOM.createRoot(document.getElementById('root'));
+root.render(<Root/>);
+</script>
+</body>
+</html>
